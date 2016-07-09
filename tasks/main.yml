@@ -1,0 +1,46 @@
+---
+- name: Assert that prerequisites exist
+  tags: rpmforge_release
+  assert:
+    that:
+      - rpmforge_pkg is defined
+      - rpmforge_ver is defined
+      - rpmforge_rel is defined
+      - rpmforge_baseurl is defined
+
+- name: Execute mktemp
+  tags: rpmforge_release
+  command: mktemp -u --suffix .rpm
+  register: rpmforge_mktemp
+
+- name: Create temporary package
+  tags: rpmforge_release
+  get_url: url={{ rpmforge_fetch }}
+           dest={{ rpmforge_mktemp.stdout }}
+  register: rpmforge_get_url
+  when: rpmforge_mktemp|success
+
+- name: Install rpmforge-release
+  tags: rpmforge_release
+  yum:  name={{ item }}
+        state=present
+  register: rpmforge_yum
+  with_items: "{{ rpmforge_mktemp.stdout }}"
+  when: rpmforge_get_url|success
+
+- name: Configure rpmforge.repo
+  tags: rpmforge_release
+  template: src=rpmforge.repo.j2
+            dest=/etc/yum.repos.d/rpmforge.repo
+            owner=root
+            group=root
+            mode=0644
+  when: rpmforge_yum|success
+
+- name: Erase temporary package
+  tags: rpmforge_release
+  file: path={{ rpmforge_mktemp.stdout }}
+        state=absent
+  when:
+    - rpmforge_mktemp|success
+    - rpmforge_yum|success
