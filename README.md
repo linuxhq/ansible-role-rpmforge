@@ -20,10 +20,9 @@ Available variables are listed below, along with default values:
     rpmforge_baseurl: "http://pkgs.repoforge.org/{{ rpmforge_pkg }}"
     rpmforge_release: "{{ rpmforge_pkg }}-{{ rpmforge_ver }}-{{ rpmforge_rel }}"
     rpmforge_fetch: "{{ rpmforge_baseurl }}/{{ rpmforge_release }}.{{ rpmforge_dist }}.{{ rpmforge_arch }}.rpm"
-    rpmforge_repos:
-      rpmforge: False
-      rpmforge_extras: False
-      rpmforge_testing: False
+    rpmforge_rpmforge: False
+    rpmforge_rpmforge_extras: False
+    rpmforge_rpmforge_testing: False
 
 All repositories are disabled by default.
 

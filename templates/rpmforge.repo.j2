@@ -5,15 +5,7 @@ name = RHEL $releasever - RPMforge.net - dag
 baseurl = http://apt.sw.be/redhat/el{{ ansible_distribution_major_version }}/en/$basearch/rpmforge
 mirrorlist = http://mirrorlist.repoforge.org/el{{ ansible_distribution_major_version }}/mirrors-rpmforge
 #mirrorlist = file:///etc/yum.repos.d/mirrors-rpmforge
-{% if rpmforge_repos.rpmforge is defined %}
-{%   if rpmforge_repos.rpmforge %}
-enabled = 1
-{%   else %}
-enabled = 0
-{%   endif %}
-{% else %}
-enabled = 0
-{% endif %}
+enabled = {{ '1' if rpmforge_rpmforge is defined and rpmforge_rpmforge else '0' }}
 protect = 0
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
 gpgcheck = 1
@@ -23,15 +15,7 @@ name = RHEL $releasever - RPMforge.net - extras
 baseurl = http://apt.sw.be/redhat/el{{ ansible_distribution_major_version }}/en/$basearch/extras
 mirrorlist = http://mirrorlist.repoforge.org/el{{ ansible_distribution_major_version }}/mirrors-rpmforge-extras
 #mirrorlist = file:///etc/yum.repos.d/mirrors-rpmforge-extras
-{% if rpmforge_repos.rpmforge_extras is defined %}
-{%   if rpmforge_repos.rpmforge_extras %}
-enabled = 1
-{%   else %}
-enabled = 0
-{%   endif %}
-{% else %}
-enabled = 0
-{% endif %}
+enabled = {{ '1' if rpmforge_rpmforge_extras is defined and rpmforge_rpmforge_extras else '0' }}
 protect = 0
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
 gpgcheck = 1
@@ -41,15 +25,7 @@ name = RHEL $releasever - RPMforge.net - testing
 baseurl = http://apt.sw.be/redhat/el{{ ansible_distribution_major_version }}/en/$basearch/testing
 mirrorlist = http://mirrorlist.repoforge.org/el{{ ansible_distribution_major_version }}/mirrors-rpmforge-testing
 #mirrorlist = file:///etc/yum.repos.d/mirrors-rpmforge-testing
-{% if rpmforge_repos.rpmforge_extras is defined %}
-{%   if rpmforge_repos.rpmforge_extras %}
-enabled = 1
-{%   else %}
-enabled = 0
-{%   endif %}
-{% else %}
-enabled = 0
-{% endif %}
+enabled = {{ '1' if rpmforge_rpmforge_testing is defined and rpmforge_rpmforge_testing else '0' }}
 protect = 0
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
 gpgcheck = 1
