@@ -17,7 +17,7 @@ Available variables are listed below, along with default values:
     rpmforge_rel: 1
     rpmforge_arch: "{{ ansible_architecture }}"
     rpmforge_dist: "el{{ ansible_distribution_major_version }}.rf"
-    rpmforge_baseurl: "http://repository.it4i.cz/mirrors/repoforge/redhat/el{{ rpmforge_dist }}/en/{{ rpmforge_arch }}/rpmforge/RPMS"
+    rpmforge_baseurl: "http://repository.it4i.cz/mirrors/repoforge/redhat/el{{ ansible_distribution_major_version }}/en/{{ rpmforge_arch }}/rpmforge/RPMS"
     rpmforge_release: "{{ rpmforge_pkg }}-{{ rpmforge_ver }}-{{ rpmforge_rel }}"
     rpmforge_fetch: "{{ rpmforge_baseurl }}/{{ rpmforge_release }}.{{ rpmforge_dist }}.{{ rpmforge_arch }}.rpm"
     rpmforge_rpmforge: False
