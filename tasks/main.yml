@@ -1,5 +1,5 @@
 ---
-- name: Assert that prerequisites exist
+- name: Assert that the prerequisites are defined
   tags: rpmforge
   assert:
     that:
@@ -8,21 +8,22 @@
       - rpmforge_rel is defined
       - rpmforge_baseurl is defined
 
-- name: Generate random package name
+- name: Generating temporary filename via mktemp
   tags: rpmforge
   command: mktemp -u --suffix .rpm
   register: rpmforge_mktemp
 
-- name: Fetch {{ rpmforge_pkg }} to temporary destination
+- name: Downloading package to temporary location
   tags: rpmforge
   get_url:
-    url: "{{ rpmforge_fetch }}"
     dest: "{{ rpmforge_mktemp.stdout }}"
+    url: "{{ rpmforge_fetch }}"
   register: rpmforge_get_url
   when: rpmforge_mktemp|success
 
-- name: Ensure that the {{ rpmforge_pkg }} package is installed
+- name: Ensure that the rpmforge-release package is installed
   tags: rpmforge
+  become: true
   yum:
     name: "{{ item }}"
     state: present
@@ -30,8 +31,9 @@
   with_items: "{{ rpmforge_mktemp.stdout }}"
   when: rpmforge_get_url|success
 
-- name: Applying {{ rpmforge_pkg }} configurations
+- name: Applying rpmforge repository configurations
   tags: rpmforge
+  become: true
   template:
     src: rpmforge.repo.j2
     dest: /etc/yum.repos.d/rpmforge.repo
@@ -40,7 +42,17 @@
     mode: 0644
   when: rpmforge_yum|success
 
-- name: Prune temporary package from the filesystem
+- name: Ensure that the RepoForge GPG keys are installed
+  tags: rpmforge
+  become: true
+  rpm_key:
+    key: "{{ item }}"
+    state: present
+  with_items:
+    - /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
+    - /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-fabian
+
+- name: Purging temporary package from filesystem
   tags: rpmforge
   file:
     path: "{{ rpmforge_mktemp.stdout }}"
