@@ -8,30 +8,47 @@
       - rpmforge_rel is defined
       - rpmforge_baseurl is defined
 
-- name: Generating temporary filename via mktemp
+- name: Attempting to generate temporary file
   tags: rpmforge
-  command: mktemp -u --suffix .rpm
-  register: rpmforge_mktemp
+  tempfile:
+    prefix: 'rpmforge.'
+    state: file
+    suffix: '.rpm'
+  register: rpmforge_tempfile
 
-- name: Downloading package to temporary location
+- name: Attempting to download package to temporary location
   tags: rpmforge
   get_url:
-    dest: "{{ rpmforge_mktemp.stdout }}"
+    dest: "{{ rpmforge_tempfile.path }}"
+    force: yes
     url: "{{ rpmforge_fetch }}"
   register: rpmforge_get_url
-  when: rpmforge_mktemp|success
+  when: rpmforge_tempfile is success
 
-- name: Ensure that the rpmforge-release package is installed
+- name: Ensure that the {{ repoforge_pkg }} package is installed
   tags: rpmforge
   become: true
   yum:
+    disable_plugin: "{{ rpmforge_disable_plugin|join(',') }}"
+    disablerepo: "{{ rpmforge_disablerepo|join(',') }}"
+    enable_plugin: "{{ rpmforge_enable_plugin|join(',') }}"
+    enablerepo: "{{ rpmforge_enablerepo|join(',') }}"
     name: "{{ item }}"
     state: present
   register: rpmforge_yum
   with_items: "{{ rpmforge_mktemp.stdout }}"
-  when: rpmforge_get_url|success
+  when: rpmforge_get_url is success
 
-- name: Applying rpmforge repository configurations
+- name: Attempting to purge temporary package from the filesystem
+  tags: rpmforge
+  file:
+    path: "{{ rpmforge_tempfile.path }}"
+    state: absent
+  when:
+    - rpmforge_tempfile is success
+    - rpmforge_yum is success
+
+- name: Attempting to overlay rpmforge repository configurations
   tags: rpmforge
   become: true
   template:
@@ -40,9 +57,9 @@
     owner: root
     group: root
     mode: 0644
-  when: rpmforge_yum|success
+  when: rpmforge_yum is success
 
-- name: Ensure that the RepoForge GPG keys are installed
+- name: Ensure that the repforge gpg keys are installed
   tags: rpmforge
   become: true
   rpm_key:
@@ -52,12 +69,17 @@
     - /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
     - /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-fabian
 
-- name: Purging temporary package from filesystem
-  tags: rpmforge
-  file:
-    path: "{{ rpmforge_mktemp.stdout }}"
-    state: absent
+- name: Ensure that the required rpmforge packages are installed
+  become: true
+  yum:
+    disable_plugin: "{{ rpmforge_disable_plugin|join(',') }}"
+    disablerepo: "{{ rpmforge_disablerepo|join(',') }}"
+    enable_plugin: "{{ rpmforge_enable_plugin|join(',') }}"
+    enablerepo: "{{ rpmforge_enablerepo|join(',') }}"
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ rpmforge_packages }}"
   when:
-    - rpmforge_mktemp|success
-    - rpmforge_yum|success
+    - rpmforge_packages|length > 0
+    - rpmforge_yum is success
 ...
