@@ -36,7 +36,7 @@
     name: "{{ item }}"
     state: present
   register: rpmforge_yum
-  with_items: "{{ rpmforge_mktemp.stdout }}"
+  with_items: "{{ rpmforge_tempfile.path }}"
   when: rpmforge_get_url is success
 
 - name: Attempting to purge temporary package from the filesystem
