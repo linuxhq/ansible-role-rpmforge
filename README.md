@@ -26,9 +26,9 @@ Available variables are listed below, along with default values:
     rpmforge_pkg: rpmforge-release
     rpmforge_rel: 1
     rpmforge_release: "{{ rpmforge_pkg }}-{{ rpmforge_ver }}-{{ rpmforge_rel }}"
-    rpmforge_repository_rpmforge: False
-    rpmforge_repository_rpmforge_extras: False
-    rpmforge_repository_rpmforge_testing: False
+    rpmforge_repository_rpmforge: false
+    rpmforge_repository_rpmforge_extras: false
+    rpmforge_repository_rpmforge_testing: false
     rpmforge_ver: 0.5.3
 
 All repositories are disabled by default.
