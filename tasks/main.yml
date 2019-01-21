@@ -25,7 +25,7 @@
   register: rpmforge_get_url
   when: rpmforge_tempfile is success
 
-- name: Ensure that the {{ repoforge_pkg }} package is installed
+- name: Ensure that the {{ rpmforge_pkg }} package is installed
   tags: rpmforge
   become: true
   yum:
@@ -33,10 +33,9 @@
     disablerepo: "{{ rpmforge_disablerepo|join(',') }}"
     enable_plugin: "{{ rpmforge_enable_plugin|join(',') }}"
     enablerepo: "{{ rpmforge_enablerepo|join(',') }}"
-    name: "{{ item }}"
+    name: "{{ rpmforge_tempfile.path }}"
     state: present
   register: rpmforge_yum
-  with_items: "{{ rpmforge_tempfile.path }}"
   when: rpmforge_get_url is success
 
 - name: Attempting to purge temporary package from the filesystem
@@ -65,9 +64,11 @@
   rpm_key:
     key: "{{ item }}"
     state: present
-  with_items:
+  loop:
     - /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
     - /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-fabian
+  loop_control:
+    label: "{{ item.split('/')[4] }}"
 
 - name: Ensure that the required rpmforge packages are installed
   become: true
@@ -78,7 +79,7 @@
     enablerepo: "{{ rpmforge_enablerepo|join(',') }}"
     name: "{{ item }}"
     state: present
-  with_items: "{{ rpmforge_packages }}"
+  loop: "{{ rpmforge_packages }}"
   when:
     - rpmforge_packages|length > 0
     - rpmforge_yum is success
